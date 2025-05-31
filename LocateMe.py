@@ -251,22 +251,18 @@ def main():
 		print('\033[;1m{*} Checking for updates...\033[0m')
 		ver_url = 'https://raw.githubusercontent.com/v1s1t0r999/LocateMe/main/.versionFile'
 		try:
-			ver_rqst = requests.get(ver_url)
-			ver_sc = ver_rqst.status_code
-			if ver_sc == 200:
-				github_ver = ver_rqst.text
-				github_ver = github_ver.strip()
-				if github_ver == version:
-					print('{+} LocateMe is in its latest version: '+str(version)+'\n')
-					time.sleep(2)
-					goAsk()
-				else:
-					print('{+} Update Available: LocateMe '+str(github_ver)+'\n')
-					goAsk()
-	
+			ver_rqst = requests.get(ver_url, timeout=5)  # timeout untuk menghindari hang
+			ver_rqst.raise_for_status()  # ini akan melempar exception jika status bukan 200
+			github_ver = ver_rqst.text.strip()
+			if github_ver == version:
+				print('{+} LocateMe is in its latest version: ' + str(version) + '\n')
 			else:
-				print('{*} Current Version: '+str(version)+'\n')
-				goAsk()
+				print('{+} Update Available: LocateMe ' + str(github_ver) + '\n')
+		except requests.exceptions.RequestException as e:
+			print(f'\033[1;91m[!] Failed to check for updates: {e}\033[0m')
+			print('{*} Current Version: ' + str(version) + '\n')
+		goAsk()
+
 
 	elif ask == '99':
 		time.sleep(2)
